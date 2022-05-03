@@ -10,10 +10,10 @@ from pygame.locals import *
 pg.init()
 
 # Ant speed
-Antspeed = [15, 20 ,25]
+Antspeed = [20, 30, 60]
 
 #
-# Highest numder of step
+# Highest value of step
 Highest = "step.txt"
 
 # Get window's size
@@ -39,6 +39,8 @@ BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 GRAY = (40, 40, 40)
 DARKGREEN = (0, 155, 0)
+RED = (255, 0 ,0)
+TEXT = (12, 114, 126)
 
 # Background Colour
 BGC = BLACK
@@ -140,19 +142,20 @@ def drawGrid():
         pg.draw.line(DISPLAYSURF, GRAY, (0, y), (WIDTH, y))
 
 
+def drawStep(value):
+    scoreSurf = DISPLAYFONT.render('Step: %s' % (value), True, TEXT)
+    scoreRect = scoreSurf.get_rect()
+    scoreRect.topleft = (WIDTH - 120, 10)
+    DISPLAYSURF.blit(scoreSurf, scoreRect)
+
+
 def drawAnt(coord):
     global x, y
 
     x = coord['x'] * Cell_size
     y = coord['y'] * Cell_size
     AntSegmentRect = pg.Rect(x, y, Cell_size, Cell_size)
-    pg.draw.rect(DISPLAYSURF, DARKGREEN, AntSegmentRect)
-    AntArrowSegment = pg.Rect(x + 1, y + 1, Cell_size - 4, Cell_size - 4)
-    pg.draw.rect(DISPLAYSURF, GREEN, AntArrowSegment)
-    AntInnerSegment = pg.Rect(x + 2, y + 2, Cell_size - 4, Cell_size - 4)
-    pg.draw.rect(DISPLAYSURF, DARKGREEN, AntInnerSegment)
-    AntCoreSegment = pg.Rect(x + 4, y + 4, Cell_size - 7, Cell_size - 7)
-    pg.draw.rect(DISPLAYSURF, GREEN, AntCoreSegment)
+    pg.draw.rect(DISPLAYSURF, RED, AntSegmentRect)
 
 
 def drawBBlock():
@@ -170,15 +173,15 @@ def drawWBlock():
 def run():
     pg.display.update()
 
+    Step = 0
+
     startx = int(Cell_W / 2)
     starty = int(Cell_H / 2)
     coord = {'x': startx, 'y': starty}
-    print(coord)
+    # print(coord) # Used for testing
 
     direction = 0
     directions = ((0, +1), (+1, 0), (0, -1), (-1, 0))
-
-    step = 0
 
     while True:
         # event handling loop
@@ -191,17 +194,35 @@ def run():
         DISPLAYSURF.fill(Colour)
         drawGrid()
         drawAnt(coord)
-        print(direction)
+        # break # Used for testing
+        # print(direction) # Used for testing
 
         if Colour == 'Black':
             drawWBlock()
             if coord in block:
                 block.remove(coord)
-                direction += 1
+                direction += 1      # If is '-=', there will be a highway.
                 startx += directions[direction % 4][0]
                 starty += directions[direction % 4][1]
+                # Interesting Bug
+                # if startx > Cell_W:
+                #     startx = 1
+                # elif startx < 0:
+                #     startx = Cell_W
+                # elif starty > Cell_H:
+                #     starty = 1
+                # elif starty == 0:
+                #    starty = Cell_H
+                if startx == Cell_W:
+                    startx = 0
+                elif startx < 0:
+                    startx = Cell_W - 1
+                if starty > Cell_H:
+                    starty = 1
+                elif starty == 0:
+                    starty = Cell_H
                 coord = {'x': startx, 'y': starty}
-                print('draw', startx, starty, coord)
+                # print('draw', startx, starty, coord) # Used for testing
             else:
                 block.append(coord)
                 direction -= 1
@@ -209,8 +230,16 @@ def run():
                     direction = 4 + direction
                 startx += directions[direction % 4][0]
                 starty += directions[direction % 4][1]
+                if startx == Cell_W:
+                    startx = 0
+                elif startx < 0:
+                    startx = Cell_W - 1
+                if starty > Cell_H:
+                    starty = 1
+                elif starty == 0:
+                    starty = Cell_H
                 coord = {'x': startx, 'y': starty}
-                print('run', startx, starty, coord)
+                # print('run', startx, starty, coord) # Used for testing
         if Colour == 'White':
             drawBBlock()
             if coord in block:
@@ -220,18 +249,34 @@ def run():
                     direction = 4 + direction
                 startx += directions[direction % 4][0]
                 starty += directions[direction % 4][1]
+                if startx == Cell_W:
+                    startx = 0
+                elif startx < 0:
+                    startx = Cell_W - 1
+                if starty > Cell_H:
+                    starty = 1
+                elif starty == 0:
+                    starty = Cell_H
                 coord = {'x': startx, 'y': starty}
-                print('draw', startx, starty, coord)
+                # print('draw', startx, starty, coord) # Used for testing
             else:
                 block.append(coord)
                 direction += 1
                 startx += directions[direction % 4][0]
                 starty += directions[direction % 4][1]
+                if startx == Cell_W:
+                    startx = 0
+                elif startx < 0:
+                    startx = Cell_W - 1
+                if starty > Cell_H:
+                    starty = 1
+                elif starty == 0:
+                    starty = Cell_H
                 coord = {'x': startx, 'y': starty}
-                print('run', startx, starty, coord)
+                # print('run', startx, starty, coord) # Used for testing
 
-
-
+        drawStep(Step)
+        Step += 1
 
         pg.display.update()
         FPSClock.tick(Antspeed[svalue - 1])
@@ -271,7 +316,7 @@ def showStartScreen():
             pg.event.get()  # clear event queue
             return
         pg.display.update()
-        FPSClock.tick(Antspeed[1]) # Title speed
+        FPSClock.tick(Antspeed[0]) # Title speed
         degrees1 += 3  # rotate by 3 degrees each frame
         degrees2 += 7  # rotate by 7 degrees each frame
 
@@ -310,13 +355,9 @@ def Setting():
 
 
 
-
-
-
-
-
 if __name__ == '__main__':
     try:
         main()
     except SystemExit:
         pass
+
