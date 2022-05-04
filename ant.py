@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import sys
+from datetime import datetime
 import pygame as pg
 import pygame_menu
 from pygame.locals import *
@@ -108,11 +109,11 @@ def checkForKeyPress():
         terminate()
     return keyUpEvents[0].key
 
-#
+
 def load_data():
     with open(Highest, "r") as f:
-        high = int(f.read())
-        return high
+        data = int(f.read())
+        return data
 
 
 def set_speed(value = (('Default', 2), 1), speed = '2') :
@@ -145,8 +146,12 @@ def drawGrid():
 def drawStep(value):
     scoreSurf = DISPLAYFONT.render('Step: %s' % (value), True, TEXT)
     scoreRect = scoreSurf.get_rect()
-    scoreRect.topleft = (WIDTH - 120, 10)
+    scoreRect.topleft = (WIDTH - 200, 10)
+    highSurf = DISPLAYFONT.render('Highest: %s' % (load_data()), True, TEXT)
+    highRect = scoreSurf.get_rect()
+    highRect.topleft = (WIDTH - 200, 30)
     DISPLAYSURF.blit(scoreSurf, scoreRect)
+    DISPLAYSURF.blit(highSurf, highRect)
 
 
 def drawAnt(coord):
@@ -173,6 +178,7 @@ def drawWBlock():
 def run():
     pg.display.update()
 
+    high = load_data()
     Step = 0
 
     startx = int(Cell_W / 2)
@@ -180,6 +186,16 @@ def run():
     coord = {'x': startx, 'y': starty}
     # print(coord) # Used for testing
 
+    # directions:
+    #               0
+    #            (0, +1)
+    #               ↑
+    #               |
+    # 3 (-1, 0) ←-- ○ --→ (+1, 0) 1
+    #               |
+    #               ↓
+    #            (0, -1)
+    #               2
     direction = 0
     directions = ((0, +1), (+1, 0), (0, -1), (-1, 0))
 
@@ -187,9 +203,25 @@ def run():
         # event handling loop
         for event in pg.event.get():
             if event.type == QUIT:
+                if Step > high:
+                    f = open('step.txt', 'w')
+                    f.write(str(Step))
+                    f.close()
+                f = open('log.txt', 'a')
+                log = str(datetime.now()) + ' ' + Speed +  ' ' + Colour + ' ' + str(Step) + '\n'
+                f.write(log)
+                f.close()
                 terminate()
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
+                    if Step >high:
+                        f = open('step.txt', 'w')
+                        f.write(str(Step))
+                        f.close()
+                    f = open('log.txt', 'a')
+                    log = str(datetime.now()) + ' ' + Speed +  ' ' + Colour + ' ' + str(Step) + '\n'
+                    f.write(log)
+                    f.close()
                     terminate()
         DISPLAYSURF.fill(Colour)
         drawGrid()
@@ -204,23 +236,14 @@ def run():
                 direction += 1      # If is '-=', there will be a highway.
                 startx += directions[direction % 4][0]
                 starty += directions[direction % 4][1]
-                # Interesting Bug
-                # if startx > Cell_W:
-                #     startx = 1
-                # elif startx < 0:
-                #     startx = Cell_W
-                # elif starty > Cell_H:
-                #     starty = 1
-                # elif starty == 0:
-                #    starty = Cell_H
                 if startx == Cell_W:
                     startx = 0
                 elif startx < 0:
                     startx = Cell_W - 1
-                if starty > Cell_H:
-                    starty = 1
-                elif starty == 0:
-                    starty = Cell_H
+                if starty == Cell_H:
+                    starty = 0
+                elif starty < 0:
+                    starty = Cell_H - 1
                 coord = {'x': startx, 'y': starty}
                 # print('draw', startx, starty, coord) # Used for testing
             else:
@@ -234,10 +257,10 @@ def run():
                     startx = 0
                 elif startx < 0:
                     startx = Cell_W - 1
-                if starty > Cell_H:
-                    starty = 1
-                elif starty == 0:
-                    starty = Cell_H
+                if starty == Cell_H:
+                    starty = 0
+                elif starty < 0:
+                    starty = Cell_H - 1
                 coord = {'x': startx, 'y': starty}
                 # print('run', startx, starty, coord) # Used for testing
         if Colour == 'White':
@@ -253,10 +276,10 @@ def run():
                     startx = 0
                 elif startx < 0:
                     startx = Cell_W - 1
-                if starty > Cell_H:
-                    starty = 1
-                elif starty == 0:
-                    starty = Cell_H
+                if starty == Cell_H:
+                    starty = 0
+                elif starty < 0:
+                    starty = Cell_H - 1
                 coord = {'x': startx, 'y': starty}
                 # print('draw', startx, starty, coord) # Used for testing
             else:
@@ -268,10 +291,10 @@ def run():
                     startx = 0
                 elif startx < 0:
                     startx = Cell_W - 1
-                if starty > Cell_H:
-                    starty = 1
-                elif starty == 0:
-                    starty = Cell_H
+                if starty == Cell_H:
+                    starty = 0
+                elif starty < 0:
+                    starty = Cell_H - 1
                 coord = {'x': startx, 'y': starty}
                 # print('run', startx, starty, coord) # Used for testing
 
